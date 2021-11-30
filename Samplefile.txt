@@ -1,0 +1,15 @@
+#!/bin/sh
+THRESHOLD=90
+echo "MEMORY USAGE"
+free |grep Mem | awk '{print $3/$2 * 100.0}'
+echo "STORAGE"
+df -H | grep -vE '^Filesystem|tmpfs' | awk '{ print $5 " " $1 }' | while read output;
+do
+  echo $output
+#usep is used percentage
+  usep=$(echo $output | awk '{ print $1}' | cut -d'%' -f1  )
+  partition=$(echo $output | awk '{ print $2 }' )
+  if [ $usep -gt $THRESHOLD ]; then
+    echo "ALERT! Runningout of space\"$partition ($usep%)\" on $(hostname) as on $(date)" 
+  fi
+done
